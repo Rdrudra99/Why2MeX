@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2 } from "lucide-react";
 import { useResult } from "@/context/ResultContext";
+import { sampleReviewData } from "@/lib/sample-data";
 
 export default function Details() {
     const router = useRouter();
@@ -45,13 +46,19 @@ export default function Details() {
 
             if (response.ok) {
                 const data = await response.json();
+                
+                // Store in context and sessionStorage for persistence
                 setReviewData(data);
+                sessionStorage.setItem('companyReviewData', JSON.stringify(data));
+                
                 router.push("/result");
             } else {
                 console.error("Failed to fetch reviews");
+                alert("Failed to fetch reviews. Please try again.");
             }
         } catch (error) {
             console.error("Error:", error);
+            alert("An error occurred. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -61,9 +68,9 @@ export default function Details() {
         <div className="container mx-auto py-12 px-4 md:px-6">
             <Card className="max-w-2xl mx-auto">
                 <CardHeader>
-                    <CardTitle className="text-2xl font-bold">Company Review Insights</CardTitle>
+                    <CardTitle className="text-2xl font-bold">Get Real Company Reviews</CardTitle>
                     <CardDescription>
-                        Enter company details to get comprehensive reviews from Glassdoor, Indeed, Ambition Box, and Google Maps.
+                        Enter company details to fetch authentic user reviews from Glassdoor, Justdial, AmbitionBox, and Google Maps.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -117,11 +124,11 @@ export default function Details() {
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="good" id="good" />
-                                    <Label htmlFor="good" className="font-normal">Mostly Positive Reviews</Label>
+                                    <Label htmlFor="good" className="font-normal">Only Positive Reviews</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="bad" id="bad" />
-                                    <Label htmlFor="bad" className="font-normal">Mostly Negative Reviews</Label>
+                                    <Label htmlFor="bad" className="font-normal">Only Negative Reviews</Label>
                                 </div>
                             </RadioGroup>
                         </div>
@@ -130,16 +137,31 @@ export default function Details() {
                             {loading ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Analyzing Reviews...
+                                    Fetching Reviews...
                                 </>
                             ) : (
-                                "Get Company Insights"
+                                "Fetch Real User Reviews"
                             )}
                         </Button>
                     </form>
+                    
+                    <div className="mt-4 pt-4 border-t">
+                        <Button 
+                            variant="outline" 
+                            className="w-full" 
+                            onClick={() => {
+                                // Use sample data for demo
+                                setReviewData(sampleReviewData);
+                                sessionStorage.setItem('companyReviewData', JSON.stringify(sampleReviewData));
+                                router.push("/result");
+                            }}
+                        >
+                            Try Demo with Sample Data
+                        </Button>
+                    </div>
                 </CardContent>
                 <CardFooter className="text-center text-sm text-muted-foreground">
-                    We analyze reviews from multiple sources to provide comprehensive insights.
+                    We fetch authentic user-generated reviews from Glassdoor, Justdial, AmbitionBox, and Google Maps.
                 </CardFooter>
             </Card>
         </div>

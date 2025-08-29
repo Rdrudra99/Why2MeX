@@ -2,44 +2,10 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-interface ReviewSummary {
-  overallRating: number;
-  totalReviews: number;
-  recommendation: string;
-}
-
-interface PlatformRatings {
-  glassdoor: number;
-  indeed: number;
-  ambitionBox: number;
-  googleMaps: number;
-}
-
-interface Assessment {
-  rating: number;
-  comments: string;
-}
-
-interface DetailedAssessment {
-  workLifeBalance: Assessment;
-  careerGrowth: Assessment;
-  management: Assessment;
-  companyCulture: Assessment;
-  salaryBenefits: Assessment;
-}
-
 interface ReviewData {
-  summary: ReviewSummary;
-  platformRatings: PlatformRatings;
-  reviewAnalysis: {
-    positiveThemes: string[];
-    negativeThemes: string[];
-  };
-  detailedAssessment: DetailedAssessment;
-  sampleReviews: {
-    positive: string[];
-    negative: string[];
-  };
+  company_name: string;
+  good_reviews: string[];
+  bad_reviews: string[];
 }
 
 interface ResultContextType {

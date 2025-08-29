@@ -18,75 +18,40 @@ export async function POST(request: Request) {
     `;
 
     const systemPrompt = `
-    You are CompanyInsightAI, an advanced AI specialized in extracting and analyzing company reviews from multiple platforms.
+    You are an AI assistant that fetches and returns real user reviews for companies from Glassdoor, Justdial, AmbitionBox, and Google Maps.
 
-    Your task is to provide detailed reviews and ratings for a company based on data from:
-    - Glassdoor
-    - Indeed
-    - Ambition Box
-    - Google Maps reviews
-    
-    For the company information provided, generate realistic and comprehensive review data that includes:
-    
-    1. Overall ratings (on a scale of 1-5) from each platform
-    2. Pros and cons mentioned in reviews
-    3. Recurring themes in positive reviews
-    4. Recurring themes in negative reviews
-    5. Work-life balance assessment
-    6. Career growth opportunities assessment
-    7. Management and leadership assessment
-    8. Company culture assessment
-    9. Salary and benefits assessment
-    
-    The user has requested ${reviewType || 'both good and bad'} reviews.
+    ### Input:
+    - Company Name
+    - Company Address (optional)
+    - Additional details (optional)
+
+    ### Task:
+    1. Search the internet for the company's reviews on Glassdoor, Justdial, AmbitionBox, and Google Maps.
+    2. Collect real user feedback exactly as it appears, without rewriting or summarizing.
+    3. Separate reviews into two categories:
+       - good_reviews → positive feedback
+       - bad_reviews → negative feedback
+    4. Do not modify, paraphrase, or invent reviews. Only return actual user feedback from those platforms.
+    5. Output only in **valid JSON** with the following format:
+
+    ### Rules:
+    - No summaries, no extra fields, no explanations.
+    - If no reviews are found, return empty arrays.
+    - Only return real user-generated feedback as available online.
     
     IMPORTANT: Your output must be a valid JSON object with the following structure:
     
     {
-      "summary": {
-        "overallRating": number,
-        "totalReviews": number,
-        "recommendation": string
-      },
-      "platformRatings": {
-        "glassdoor": number,
-        "indeed": number,
-        "ambitionBox": number,
-        "googleMaps": number
-      },
-      "reviewAnalysis": {
-        "positiveThemes": string[],
-        "negativeThemes": string[]
-      },
-      "detailedAssessment": {
-        "workLifeBalance": {
-          "rating": number,
-          "comments": string
-        },
-        "careerGrowth": {
-          "rating": number,
-          "comments": string
-        },
-        "management": {
-          "rating": number,
-          "comments": string
-        },
-        "companyCulture": {
-          "rating": number,
-          "comments": string
-        },
-        "salaryBenefits": {
-          "rating": number,
-          "comments": string
-        }
-      },
-      "sampleReviews": {
-        "positive": string[],
-        "negative": string[]
-      }
+      "company_name": "<company name>",
+      "good_reviews": [
+        "...",
+        "..."
+      ],
+      "bad_reviews": [
+        "...",
+        "..."
+      ]
     }
-    
-    Based on the company information provided, create realistic and detailed review data that could help someone make an informed decision about the company.
     `;
 
     const chatCompletion = await groq.chat.completions.create({
@@ -119,6 +84,22 @@ export async function POST(request: Request) {
     return NextResponse.json(content);
   } catch (error) {
     console.error('Error processing request:', error);
-    return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
+    
+    let errorMessage = 'Failed to process request';
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    
+    if (!process.env.GROQ_API_KEY || process.env.GROQ_API_KEY === 'your-api-key-here') {
+      errorMessage = 'API key not configured. Please add your GROQ API key to .env.local file.';
+    }
+    
+    return NextResponse.json({ 
+      error: errorMessage,
+      company_name: 'Error',
+      good_reviews: [],
+      bad_reviews: []
+    }, { status: 500 });
   }
 }
